@@ -18,11 +18,6 @@ A text-only usenet client-server combo with extra perks.
 
 Not a keyring, but rather an "I take responsibility for whatever goes out on usenet with this signature".
     
-### Torrent or Kademlia based distribution of news batches.
-
-Instead of being a client, PMX should also be a peer-2-peer way to distribute TEXT-ONLY usenet news.
-Reason: there's enough free bandwidth between home users for sustaining text-only news batches.
-
 ### Robomoderation: A system of optional, shareable inbound / outbound bayes filters.
 
 Every single PMX user should be able to filter messages fast by applying one or more bayes filters, each one
@@ -32,6 +27,11 @@ popping up.
 
 Notice that I will not distribute an antispam list on github, but eventually it should be possible to collect
 spam samples. Also it will be based on a simple chain.
+
+### Peer2Peer based distribution of news batches.
+
+Instead of being a client, PMX should also be a peer-2-peer way to distribute TEXT-ONLY usenet news.
+Reason: there's enough free bandwidth between home users for sustaining text-only news batches.
 
 ## Why text-only?
 
@@ -46,5 +46,5 @@ I currently have not enough time to study either of those. End of story.
 
 * 2021 Reasonably implement the NNTP RFCS and have a basic windows client and a standalone server
 * 2022 Signatures
-* 2023 P2P Distribution of news batches
-* 2024 Robomoderation / Bayes Filters
+* 2024 P2P Distribution of news batches
+* 2023 Robomoderation / Bayes Filters

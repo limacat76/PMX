@@ -30,55 +30,39 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using System;
 using System.Net;
 using System.Net.Sockets;
-using System.IO;
 using System.Text;
+using System.IO;
 
-namespace Pmx.Standalone
+namespace Pmx.Client
 {
-
     class Program
     {
-        static Logger logger = new Logger(Systems.Standalone, typeof(Program).Name);
+        static Logger logger = new Logger(Systems.Client, typeof(Program).Name);
 
         static void Main(string[] args)
         {
-            logger.Info("Starting");
+            logger.Info("Hello World!");
+            System.Threading.Thread.Sleep(2000);
+            logger.Info("Connecting!");
 
-            // TODO: Configure
-            TcpListener myListener = new TcpListener(IPAddress.Any, 5000);
-            myListener.Start();
+            TcpClient client = new TcpClient("127.0.0.1", 5000);
+            int timeout = 5000;
 
-            bool shutdown = false;
-            while (!shutdown)
+            using (Stream myStream = client.GetStream())
             {
-                logger.Info("Accepting a connection!");
-                Socket mySocket = myListener.AcceptSocket();
-                // TODO SPAWN A NEW THREAD
-                logger.Info("Connection accepted!");
-                Stream myStream = new NetworkStream(mySocket);
+                myStream.ReadTimeout = timeout;
+
                 StreamReader reader = new StreamReader(myStream, Encoding.UTF8);
                 StreamWriter writer = new StreamWriter(myStream, Encoding.UTF8) { AutoFlush = true };
-                writer.WriteLine("200 PMX");
-                bool quit = false;
-                while (!quit) { 
-                    string text = reader.ReadLine();
-                    if (text != null && text.Trim() == "QUIT")
-                    {
-                        quit = true;
-                    }
-                    else
-                    {
-                        writer.WriteLine("500 NOT IMPLEMENTED");
-                    }
-                }
-                writer.WriteLine("205 Bye!");
-                myStream.Close();
-                mySocket.Close();
-                logger.Info("Connection closed!");
 
-            }
+                string message = reader.ReadLine();
+                logger.Info($"Server: {message}"); 
 
-            logger.Info("Goodbye!");
+                writer.WriteLine("QUIT");
+                message = reader.ReadLine();
+                logger.Info($"Server: {message}");
+
+            };// The client and stream will close as control exits the using block (Equivilent but safer than calling Close();
         }
     }
 }
