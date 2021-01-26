@@ -35,9 +35,86 @@ using System.IO;
 
 namespace Pmx.Client
 {
+
+    public class Result
+    {
+        public Result(Command Next)
+        {
+            this.Next = Next;
+        }
+
+        public string Status;
+
+        public string Header;
+
+        // TODO Multiline Repsonse
+
+        public Command Next;
+
+    }
+
+    public class Command
+    {
+        static readonly Logger logger = new Logger(Systems.Client, typeof(Command).Name);
+
+        public TextWriter Writer;
+
+        public TextReader Reader;
+
+        public string Send;
+
+        // 1xx - Informative message
+        // 2xx - Command completed OK
+        // 3xx - Command OK so far; send the rest of it
+        public Command OnSuccess;
+        /*
+        public Node OnInformation;
+        public Node OnContinue;
+        */
+
+        // 4xx - Command was syntactically correct but failed for some reason
+        // 5xx - Command unknown, unsupported, unavailable, or syntax error
+        public Command OnFailure;
+        /*
+        public Node OnError;
+        */
+
+        public Command(TextWriter Writer, TextReader Reader)
+        {
+            this.Writer = Writer;
+            this.Reader = Reader;
+        }
+
+        public Result Go()
+        {
+            if (Send != null)
+            {
+                logger.Info($"Host: {Send}");
+                Writer.WriteLine(Send);
+            }
+            string result = Reader.ReadLine();
+            logger.Info($"Peer: {result}");
+
+            Command next;
+            if (result.StartsWith("1") || result.StartsWith("2") || result.StartsWith("3"))
+            {
+                next = OnSuccess;
+            } else
+            {
+                next = OnFailure;
+            }
+            return new Result(next)
+            {
+                Header = result,
+                Status = result.Substring(0, 3)
+            };
+        }
+
+    }
+
     class Program
     {
-        static Logger logger = new Logger(Systems.Client, typeof(Program).Name);
+        static readonly Logger logger = new Logger(Systems.Client, typeof(Program).Name);
 
         static void Main(string[] args)
         {
@@ -55,14 +132,22 @@ namespace Pmx.Client
                 StreamReader reader = new StreamReader(myStream, Encoding.UTF8);
                 StreamWriter writer = new StreamWriter(myStream, Encoding.UTF8) { AutoFlush = true };
 
-                string message = reader.ReadLine();
-                logger.Info($"Server: {message}"); 
+                Command header = new Command(writer, reader)
+                {
+                    OnSuccess = new Command(writer, reader)
+                    {
+                        Send = "QUIT"
+                    }
+                };
 
-                writer.WriteLine("QUIT");
-                message = reader.ReadLine();
-                logger.Info($"Server: {message}");
-
-            };// The client and stream will close as control exits the using block (Equivilent but safer than calling Close();
+                Command pointer = header;
+                while (pointer != null)
+                {
+                    Result result = pointer.Go();
+                    logger.Info($"Peer: {result.Status}");
+                    pointer = result.Next;
+                }
+            };
         }
     }
 }
