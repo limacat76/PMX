@@ -40,6 +40,7 @@ namespace Pmx.Standalone
     {
         static Logger logger = new Logger(Systems.Standalone, typeof(Program).Name);
 
+        // TODO async 2021-01-27
         static void Main(string[] args)
         {
             logger.Info("Starting");
@@ -53,11 +54,14 @@ namespace Pmx.Standalone
             {
                 logger.Info("Accepting a connection!");
                 Socket mySocket = myListener.AcceptSocket();
+
                 // TODO SPAWN A NEW THREAD
                 logger.Info("Connection accepted!");
                 Stream myStream = new NetworkStream(mySocket);
                 StreamReader reader = new StreamReader(myStream, Encoding.UTF8);
+                // TODO use PipeReader.Create() 2021-01-27
                 StreamWriter writer = new StreamWriter(myStream, Encoding.UTF8) { AutoFlush = true };
+                // TODO use PipeWriter.Create() 2021-01-27
                 writer.WriteLine("200 PMX");
                 bool quit = false;
                 while (!quit) { 

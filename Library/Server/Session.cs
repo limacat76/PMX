@@ -4,45 +4,74 @@ using System.IO.Pipelines;
 using System.Text;
 using System.Threading.Tasks;
 using static Pmx.Hindrance;
-namespace Pmx.Server
+
+namespace Pmx.Communication
 {
-    // TODO implement IDisposable() for the Complete() 2021-01-27
-    public class Session
+
+    // TODO find a better name 2021-01-27
+    public class Pepi
     {
-        static Logger logger = new Logger(Systems.Library, typeof(Session).Name);
-        private Pipe input;
-        private Pipe output;
+        public Pepi(PipeReader Reader, PipeWriter Writer)
+        {
+            this.Reader = Reader;
+            this.Writer = Writer;
+        }
 
         public PipeReader Reader
         {
-            get { 
-                return output.Reader;
-            }
+            get; private set;
         }
 
         public PipeWriter Writer
         {
-            get
-            {
-                return input.Writer;
-            }
+            get; private set;
+        }
+    }
+
+    public class IPCConnector
+    {
+        static Logger logger = new Logger(Systems.Library, typeof(IPCConnector).Name);
+
+        // motivation, a standalone server process needs only half of two pipes
+        public IPCConnector()
+        {
+            Pipe input = new Pipe();
+            Pipe output = new Pipe();
+            ServerSide = new Pepi(input.Reader, output.Writer);
+            ClientSide = new Pepi(output.Reader, input.Writer);
         }
 
-        public Session()
+        public Pepi ServerSide
         {
-            input = new Pipe();
-            output = new Pipe();
+            get; private set;
         }
 
-        public async Task Execute()
+        public Pepi ClientSide
         {
-            WriteLine(output.Writer, "200 Welcome");
+            get; private set;
+        }
+
+    }
+
+}
+
+namespace Pmx.Server
+{
+
+    // TODO implement IDisposable() for the Complete() 2021-01-27
+    public class Session
+    {
+        static Logger logger = new Logger(Systems.Library, typeof(Session).Name);
+
+        public async Task Execute(PipeReader Reader, PipeWriter Writer)
+        {
+            WriteLine(Writer, "200 Welcome");
             bool quit = false;
             string line;
             while (!quit)
             {
                 // TODO session should be closed if input.Reader is closed 2021-01-27
-                line = await ReadLineAsync(input.Reader);
+                line = await ReadLineAsync(Reader);
                 logger.Info(line);
                 if (line.Trim().ToUpper().Equals("QUIT"))
                 {
@@ -50,11 +79,11 @@ namespace Pmx.Server
                 }
                 else
                 {
-                    WriteLine(output.Writer, "500 Not Implemented");
+                    WriteLine(Writer, "500 Not Implemented");
                 }
             }
             // TODO since we broke or are outside the loop we should close output.Writer 2021-01-27
-            WriteLine(output.Writer, "205 Goodbye");
+            WriteLine(Writer, "205 Goodbye");
         }
 
     }

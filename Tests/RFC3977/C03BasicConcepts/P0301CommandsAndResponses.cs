@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using Xunit;
 using Pmx.Server;
+using Pmx.Communication;
 using static Pmx.Hindrance;
 using static Tests.RFC3977.ResponseCodes;
 using System.IO.Pipelines;
@@ -17,12 +18,14 @@ namespace Tests.RFC3977.C03BasicConcepts
         /// </summary>
         public async void ConnectionEstablished()
         {
+            IPCConnector connector = new IPCConnector();
             Session server = new Session();
-            PipeReader reader = server.Reader;
-            PipeWriter writer = server.Writer;
+            PipeReader reader = connector.ClientSide.Reader;
+            PipeWriter writer = connector.ClientSide.Writer;
 
-            _ = server.Execute();
+            _ = server.Execute(connector.ServerSide.Reader, connector.ServerSide.Writer);
             Is2XX(await ReadLineAsync(reader));
+            Is5XX(await RoundTrip(writer, "QUACK", reader));
             Is5XX(await RoundTrip(writer, "QUACK", reader));
             Is2XX(await RoundTrip(writer, "QUIT", reader));
         }
