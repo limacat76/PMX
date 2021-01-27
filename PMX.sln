@@ -12,7 +12,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Library", "Library\Library.csproj", "{C276CB05-D4EE-40B2-9AB6-89DD627C9BE7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Client", "Client\Client.csproj", "{823F25C0-DF41-424A-B6BE-DF7D4B55D5C1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Client", "Client\Client.csproj", "{823F25C0-DF41-424A-B6BE-DF7D4B55D5C1}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Spikes", "Spikes\Spikes.csproj", "{8C42CB6B-C826-4B72-BB5B-7A61A0143F42}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -32,6 +34,10 @@ Global
 		{823F25C0-DF41-424A-B6BE-DF7D4B55D5C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{823F25C0-DF41-424A-B6BE-DF7D4B55D5C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{823F25C0-DF41-424A-B6BE-DF7D4B55D5C1}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8C42CB6B-C826-4B72-BB5B-7A61A0143F42}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8C42CB6B-C826-4B72-BB5B-7A61A0143F42}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8C42CB6B-C826-4B72-BB5B-7A61A0143F42}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8C42CB6B-C826-4B72-BB5B-7A61A0143F42}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
