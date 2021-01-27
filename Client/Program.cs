@@ -27,8 +27,6 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-using System;
-using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.IO;
@@ -37,7 +35,7 @@ namespace Pmx.Client
 {
     class Program
     {
-        static Logger logger = new Logger(Systems.Client, typeof(Program).Name);
+        private readonly static Logger logger = new Logger(Systems.Client, nameof(Program));
 
         static void Main(string[] args)
         {
@@ -52,17 +50,21 @@ namespace Pmx.Client
             {
                 myStream.ReadTimeout = timeout;
 
-                StreamReader reader = new StreamReader(myStream, Encoding.UTF8);
-                StreamWriter writer = new StreamWriter(myStream, Encoding.UTF8) { AutoFlush = true };
+                var encoding = new UTF8Encoding(false);
+
+                StreamReader reader = new StreamReader(myStream, encoding);
+                StreamWriter writer = new StreamWriter(myStream, encoding) {  NewLine = "\r\n", AutoFlush = true };
 
                 string message = reader.ReadLine();
-                logger.Info($"Server: {message}"); 
-
+                logger.Info($"Server: {message}");
+                writer.WriteLine("QUACK");
+                message = reader.ReadLine();
+                logger.Info($"Server: {message}");
                 writer.WriteLine("QUIT");
                 message = reader.ReadLine();
                 logger.Info($"Server: {message}");
 
-            };// The client and stream will close as control exits the using block (Equivilent but safer than calling Close();
+            };// The client and stream will close as control exits the using block (Equivalent but safer than calling Close();
         }
     }
 }

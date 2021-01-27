@@ -27,25 +27,24 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-using System;
+using System.IO;
+using System.IO.Pipelines;
 using System.Net;
 using System.Net.Sockets;
-using System.IO;
-using System.Text;
+using System.Threading.Tasks;
+using Pmx.Server;
 
 namespace Pmx.Standalone
 {
-
     class Program
     {
-        static Logger logger = new Logger(Systems.Standalone, typeof(Program).Name);
+        private readonly static Logger logger = new Logger(Systems.Standalone, nameof(Program));
 
-        // TODO async 2021-01-27
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             logger.Info("Starting");
 
-            // TODO: Configure
+            // TODO Make configurable 2021-01-27
             TcpListener myListener = new TcpListener(IPAddress.Any, 5000);
             myListener.Start();
 
@@ -53,36 +52,25 @@ namespace Pmx.Standalone
             while (!shutdown)
             {
                 logger.Info("Accepting a connection!");
-                Socket mySocket = myListener.AcceptSocket();
-
-                // TODO SPAWN A NEW THREAD
-                logger.Info("Connection accepted!");
-                Stream myStream = new NetworkStream(mySocket);
-                StreamReader reader = new StreamReader(myStream, Encoding.UTF8);
-                // TODO use PipeReader.Create() 2021-01-27
-                StreamWriter writer = new StreamWriter(myStream, Encoding.UTF8) { AutoFlush = true };
-                // TODO use PipeWriter.Create() 2021-01-27
-                writer.WriteLine("200 PMX");
-                bool quit = false;
-                while (!quit) { 
-                    string text = reader.ReadLine();
-                    if (text != null && text.Trim() == "QUIT")
-                    {
-                        quit = true;
-                    }
-                    else
-                    {
-                        writer.WriteLine("500 NOT IMPLEMENTED");
-                    }
-                }
-                writer.WriteLine("205 Bye!");
-                myStream.Close();
-                mySocket.Close();
-                logger.Info("Connection closed!");
-
+                Socket mySocket = await myListener.AcceptSocketAsync();
+                _ = RunSession(mySocket);
             }
 
             logger.Info("Goodbye!");
+        }
+
+        private static async Task RunSession(Socket mySocket)
+        {
+            logger.Info("Connection accepted!");
+            Stream myStream = new NetworkStream(mySocket);
+            PipeReader reader = PipeReader.Create(myStream);
+            PipeWriter writer = PipeWriter.Create(myStream);
+
+            Session session = new Session();
+            await session.Execute(reader, writer);
+            myStream.Close();
+            mySocket.Close();
+            logger.Info("Connection closed!");
         }
     }
 }

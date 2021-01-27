@@ -43,7 +43,7 @@ namespace Pmx
         public const string Tests = "Tests";
     }
 
-    // TODO Ugly facade, make it so that this routes the message to the actual .net core logging API 2021-01-27
+    // TODO Ugly facade, make it so that this routes the message to the actual net core logging API 2021-01-27
     public class Logger
     {
 
@@ -96,7 +96,7 @@ namespace Pmx
             return toReturn;
         }
 
-        // TODO Return a thing with Message, ConnectionStatus and ServerStatus  2021-01-27
+        // TODO Return a thing with Message, ConnectionStatus and ServerStatus 2021-01-27
         public static async System.Threading.Tasks.Task<string> RoundTrip(PipeWriter to, string value, PipeReader from)
         {
             WriteLine(to, value);
@@ -124,6 +124,7 @@ namespace Pmx
             {
                 return null;
             }
+            // TODO Test for \r before \n, see if there's a syntax error for invalid newlines
 
             // Skip the line + the \n.
             ReadOnlySequence<byte> line = buffer.Slice(0, position.Value);
